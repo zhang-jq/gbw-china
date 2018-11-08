@@ -64,6 +64,7 @@ public class SimplePipeline implements Pipeline {
             oldProduct.setStandardValue(product.getStandardValue());
             oldProduct.setCdsNumber(product.getCdsNumber());
             oldProduct.setDevelopmentUnit(product.getDevelopmentUnit());
+            oldProduct.setCat(product.getCat());
             productService.update(oldProduct);
         } else {
             productService.save(product);

@@ -46,6 +46,9 @@
     <update id="update">
         UPDATE product
         <set>
+            <if test="cat != null and cat != ''">
+                cat = #{cat},
+            </if>
             <if test="goodsNumber != null and goodsNumber != ''">
                 goods_number = #{goodsNumber},
             </if>

@@ -28,15 +28,14 @@ public class GbwChinaProcessor implements PageProcessor {
 
     //分类
     public final static Map<String, String> catalog = new HashMap() {{
-        put("http://www.gbw-china.com/list/11_0_0_0_0_0.html", "食品标准物质");
-        put("http://www.gbw-china.com/list/12_0_0_0_0_0.html", "环境标准物质");
-        put("http://www.gbw-china.com/list/10_0_0_0_0_0.html", "职业卫生标准物质");
-        put("http://www.gbw-china.com/list/9_0_0_0_0_0.html", "仪器检定标准物质");
-        put("http://www.gbw-china.com/list/85_0_0_0_0_0.html", "药典及对照品");
-        put("http://www.gbw-china.com/list/6_0_0_0_0_0.html", "地质矿产标准物质");
-        put("http://www.gbw-china.com/list/5_0_0_0_0_0.html", "其他标准物质");
+        put("11_0_0_0_0_0", "食品标准物质");
+        put("12_0_0_0_0_0", "环境标准物质");
+        put("10_0_0_0_0_0", "职业卫生标准物质");
+        put("9_0_0_0_0_0", "仪器检定标准物质");
+        put("85_0_0_0_0_0", "药典及对照品");
+        put("6_0_0_0_0_0", "地质矿产标准物质");
+        put("5_0_0_0_0_0", "其他标准物质");
     }};
-
 
     @Autowired
     private static SimplePipeline simplePipeline;
@@ -49,8 +48,15 @@ public class GbwChinaProcessor implements PageProcessor {
         if (url.equals(BASE)) {
 //            List<String> urlList = doc.select(".main_nav .left_nav .left_list .sub_list_i a")
 //                    .stream().map(a -> a.attr("abs:href")).collect(Collectors.toList());
-            List<String> urlList = new ArrayList<>();
-            catalog.forEach((k, v) -> urlList.add(k));
+            List<String> urlList = Stream.of(
+                    "http://www.gbw-china.com/list/11_0_0_0_0_0.html",
+                    "http://www.gbw-china.com/list/12_0_0_0_0_0.html",
+                    "http://www.gbw-china.com/list/10_0_0_0_0_0.html",
+                    "http://www.gbw-china.com/list/9_0_0_0_0_0.html",
+                    "http://www.gbw-china.com/list/85_0_0_0_0_0.html",
+                    "http://www.gbw-china.com/list/6_0_0_0_0_0.html",
+                    "http://www.gbw-china.com/list/5_0_0_0_0_0.html"
+            ).collect(Collectors.toList());
 
             page.addTargetRequests(urlList);
         } else if (url.contains("http://www.gbw-china.com/list") || url.contains("http://www.gbw-china.com/Product/index.html?lists=")) {
@@ -67,9 +73,14 @@ public class GbwChinaProcessor implements PageProcessor {
             page.addTargetRequests(urlList);
 
             List<Product> productList = this.productInfo(doc);
-            String cat = catalog.get(url);
-            //分类
-            productList.stream().forEach(product -> product.setCat(cat));
+
+            //获取分类
+            catalog.forEach((k, v) -> {
+                if (url.indexOf(k) > -1) {
+                    productList.stream().forEach(product -> product.setCat(v));
+                    return;
+                }
+            });
 
             page.putField("productList", productList);
         } else if (url.contains("http://www.gbw-china.com/info")) {
@@ -157,7 +168,7 @@ public class GbwChinaProcessor implements PageProcessor {
         SimpleHttpClientDownloader downloader = new SimpleHttpClientDownloader();
 
         SimpleSpider spider = SimpleSpider.create(new GbwChinaProcessor())
-                .addUrl(BASE)
+                .addUrl("http://www.gbw-china.com/Product/index.html?lists=11_0_0_0_0_0")
 //                .addPipeline(simplePipeline)
                 .addPipeline(new SimplePipeline())
                 .setUUID(BASE)  //spider 使用uuid确定唯一性
